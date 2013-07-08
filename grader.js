@@ -40,62 +40,62 @@ var URL_DEFAULT = "http://bitstarter-lse.herokuapp.com/";
 var assertFileExists = function(infile) {
     var instr = infile.toString();
     if(!fs.existsSync(instr)) {
-        console.log("%s does not exist. Exiting.", instr);
+//        console.log("%s does not exist. Exiting.", instr);
         process.exit(1); // http://nodejs.org/api/process.html#process_process_exit_code
     }
     return instr;
 };
 
 var cheerioHtml = function(html) {
-    console.log("entering cheerioHtml");
+//    console.log("entering cheerioHtml");
     return cheerio.load(html);
 };
 
 var restlerHtmlFile = function(url, checksfile) {
-    console.log("entering restlerHtmlFile");
+//    console.log("entering restlerHtmlFile");
     var checks = loadChecks(checksfile).sort();
     var generateResult = buildfn(url, checks);
 	rest.get(url).on('complete', generateResult);
     // no return value
-    console.log("leaving restlerHtmlFile");
+//    console.log("leaving restlerHtmlFile");
 }
 
 var buildfn = function(url, checks) {
-        console.log("entering buildfn with URL: %s and checks: %s",url, checks); 
+//        console.log("entering buildfn with URL: %s and checks: %s",url, checks); 
         // create a function which complies to the signature of the 
         // rest.request call back (event "complete")
         var generateResults = function(result, response) {
 
-            console.log("entering generateResults with result: %s and response: %s"
-                    ,result, util.format(response.message));
+//            console.log("entering generateResults with result: %s and response: %s"
+//                    ,result, util.format(response.message));
             if (result instanceof Error) {
                 console.error('Error: '+ util.format(response.message));
             } else {
                 var out = {};
                 // create a DOM from HTML
                 var $ = cheerioHtml(result);
-                console.log("returned from  cheerioHtml with $: "+ $);
+//                console.log("returned from  cheerioHtml with $: "+ $);
                 // iterate through check-JSON
                 for(var ii in checks) {
                     // check whether entry is present in given HTML 
                     var present = $(checks[ii]).length > 0;
-                    console.log("* ii: %s -> present: %s",ii,present);
+//                    console.log("* ii: %s -> present: %s",ii,present);
                     // set the cheresult in the out-array
                     out[checks[ii]] = present;
                 }
                 var outJson = JSON.stringify(out, null, 4);
-                console.log("OUTJSON: \n", outJson);
+                console.log(outJson);
             }
-        console.log("leaving generateResults");
+//        console.log("leaving generateResults");
     };
-    console.log("leaving buildfn");
+//    console.log("leaving buildfn");
     return generateResults;
 };
 
 var loadChecks = function(checksfile) {
-    console.log("### entering loadChecks");
+//    console.log("### entering loadChecks");
     var checkJson = JSON.parse(fs.readFileSync(checksfile));
-    console.log("checkJson: ", checkJson);
+//    console.log("checkJson: ", checkJson);
     return checkJson;
 };
 /*
@@ -130,17 +130,17 @@ var clone = function(fn) {
 };
 
 if(require.main == module) {
-    	console.log("process.argv: "+process.argv);
+//    	console.log("process.argv: "+process.argv);
     	// parse the CL parameters
 	program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         // .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
-        .option('-u, --url <url>', 'URL to page', clone(assertFileExists), URL_DEFAULT)
+        .option('-u, --url <url>', 'URL to page', URL_DEFAULT)
         .parse(process.argv);
 
-	console.log("program.checks: " + program.checks);
+//	console.log("program.checks: " + program.checks);
 	// console.log("program.file: " + program.file);
-	console.log("program.url: " + program.url);
+//	console.log("program.url: " + program.url);
     
     restlerHtmlFile(program.url, program.checks);
 
